@@ -1,0 +1,334 @@
+
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1">
+
+    <title>Atenciones médicas | DENTAL - Vital Salud</title>
+
+    <!-- Archivo CSS -->
+    <link rel="stylesheet"
+          th:href="@{/css/estilos.css}">
+</head>
+
+<body class="dashboard">
+
+    <!-- ======================================
+         1. ENCABEZADO SUPERIOR
+    ======================================= -->
+
+    <header class="topbar">
+
+        <div class="topbar-brand">
+
+            <span class="brand-icon">✚</span>
+
+            <div>
+                <strong>DENTAL</strong>
+                <small>Vital Salud</small>
+            </div>
+
+        </div>
+
+        <div class="topbar-info">
+            Sistema de Gestión Odontológica
+        </div>
+
+    </header>
+
+
+    <!-- ======================================
+         2. ESTRUCTURA PRINCIPAL
+    ======================================= -->
+
+    <div class="dashboard-layout">
+
+        <!-- MENÚ LATERAL -->
+        <aside class="sidebar">
+
+            <nav class="sidebar-menu">
+
+                <!-- INICIO -->
+                <a th:href="@{/}">
+                    <span>⌂</span>
+                    Inicio
+                </a>
+
+                <!-- PACIENTES -->
+                <a th:href="@{/pacientes}">
+                    <span>👥</span>
+                    Pacientes
+                </a>
+
+                <!-- CITAS MÉDICAS -->
+                <a th:href="@{/citas}">
+                    <span>▦</span>
+                    Citas médicas
+                </a>
+
+                <!-- ATENCIONES -->
+                <a class="active" th:href="@{/historias}">
+                    <span>✚</span>
+                    Atenciones
+                </a>
+
+            </nav>
+
+            <div class="sidebar-footer">
+                DENTAL · Vital Salud
+            </div>
+
+        </aside>
+
+
+        <!-- ======================================
+             3. CONTENIDO PRINCIPAL
+        ======================================= -->
+
+        <main class="dashboard-main">
+
+            <!-- TÍTULO -->
+            <div class="page-title">
+
+                <div>
+
+                    <span class="eyebrow">
+                        GESTIÓN DE ATENCIONES
+                    </span>
+
+                    <!-- TÍTULO DINÁMICO -->
+                    <h1 th:text="${registro.id == null}
+                        ? 'Registrar atención médica'
+                        : 'Editar atención médica'">
+                        Registrar atención médica
+                    </h1>
+
+                    <p>
+                        Registra los datos de la consulta,
+                        el diagnóstico y el tratamiento
+                        del paciente.
+                    </p>
+
+                </div>
+
+                <!-- VOLVER AL LISTADO -->
+                <a class="btn secondary"
+                   th:href="@{/historias}">
+                    ← Volver a atenciones
+                </a>
+
+            </div>
+
+
+            <!-- ======================================
+                 4. FORMULARIO DE ATENCIONES
+            ======================================= -->
+
+            <section class="panel form-panel atencion-form-panel">
+
+                <div class="form-section-title">
+
+                    <h2>Información de la atención</h2>
+
+                    <p>
+                        Completa los datos clínicos
+                        correspondientes a la atención
+                        del paciente.
+                    </p>
+
+                </div>
+
+
+                <form
+                    method="post"
+                    th:action="@{/historias/guardar}"
+                    th:object="${registro}"
+                >
+
+                    <!-- ID OCULTO PARA EDICIÓN -->
+                    <input
+                        type="hidden"
+                        th:field="*{id}"
+                    >
+
+
+                    <!-- ==================================
+                         5. DATOS GENERALES
+                    =================================== -->
+
+                    <div class="form-grid">
+
+                        <!-- PACIENTE -->
+                        <label class="field">
+
+                            Paciente
+
+                            <select
+                                th:field="*{paciente}"
+                                required
+                            >
+
+                                <option value="">
+                                    Seleccione un paciente
+                                </option>
+
+                                <option
+                                    th:each="p : ${pacientes}"
+                                    th:value="${p.id}"
+                                    th:text="${p.nombres + ' ' + p.apellidos + ' · ' + p.dni}"
+                                >
+                                    Paciente
+                                </option>
+
+                            </select>
+
+                        </label>
+
+
+                        <!-- MÉDICO -->
+                        <label class="field">
+
+                            Médico responsable
+
+                            <select th:field="*{medico}">
+
+                                <option value="">
+                                    Seleccione un médico
+                                </option>
+
+                                <option
+                                    th:each="u : ${usuarios}"
+                                    th:value="${u.id}"
+                                    th:text="${u.nombre}"
+                                >
+                                    Médico
+                                </option>
+
+                            </select>
+
+                        </label>
+
+
+                        <!-- FECHA DE ATENCIÓN -->
+                        <label class="field">
+
+                            Fecha y hora de atención
+
+                            <input
+                                type="datetime-local"
+                                th:field="*{fechaAtencion}"
+                                required
+                            >
+
+                        </label>
+
+                    </div>
+
+
+                    <!-- ==================================
+                         6. INFORMACIÓN CLÍNICA
+                    =================================== -->
+
+                    <div class="seccion-clinica">
+
+                        <h2>Evaluación clínica</h2>
+
+                        <p>
+                            Registra los síntomas,
+                            el diagnóstico y el tratamiento.
+                        </p>
+
+                    </div>
+
+
+                    <!-- SÍNTOMAS -->
+                    <div class="campo-clinico">
+
+                        <label for="sintomas">
+                            Síntomas
+                        </label>
+
+                        <textarea
+                            id="sintomas"
+                            th:field="*{sintomas}"
+                            rows="4"
+                            placeholder="Describe los síntomas del paciente..."
+                        ></textarea>
+
+                    </div>
+
+
+                    <!-- DIAGNÓSTICO -->
+                    <div class="campo-clinico">
+
+                        <label for="diagnostico">
+                            Diagnóstico
+                            <span class="campo-requerido">*</span>
+                        </label>
+
+                        <textarea
+                            id="diagnostico"
+                            th:field="*{diagnostico}"
+                            rows="4"
+                            placeholder="Ingresa el diagnóstico médico..."
+                            required
+                        ></textarea>
+
+                    </div>
+
+
+                    <!-- TRATAMIENTO -->
+                    <div class="campo-clinico">
+
+                        <label for="tratamiento">
+                            Tratamiento
+                        </label>
+
+                        <textarea
+                            id="tratamiento"
+                            th:field="*{tratamiento}"
+                            rows="4"
+                            placeholder="Describe el tratamiento indicado..."
+                        ></textarea>
+
+                    </div>
+
+
+                    <!-- ==================================
+                         7. BOTONES DEL FORMULARIO
+                    =================================== -->
+
+                    <div class="form-actions">
+
+                        <!-- CANCELAR -->
+                        <a
+                            class="btn secondary"
+                            th:href="@{/historias}"
+                        >
+                            Cancelar
+                        </a>
+
+                        <!-- GUARDAR -->
+                        <button
+                            class="btn"
+                            type="submit"
+                        >
+                            Guardar atención
+                        </button>
+
+                    </div>
+
+                </form>
+
+            </section>
+
+        </main>
+
+    </div>
+
+</body>
+</html>

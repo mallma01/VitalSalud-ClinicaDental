@@ -1,0 +1,353 @@
+
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1">
+
+    <title>Atenciones médicas | DENTAL - Vital Salud</title>
+
+    <!-- Archivo de estilos -->
+    <link rel="stylesheet"
+          th:href="@{/css/estilos.css}">
+</head>
+
+<body class="dashboard">
+
+    <!-- ======================================
+         1. ENCABEZADO SUPERIOR
+    ======================================= -->
+
+    <header class="topbar">
+
+        <div class="topbar-brand">
+
+            <span class="brand-icon">✚</span>
+
+            <div>
+                <strong>DENTAL</strong>
+                <small>Vital Salud</small>
+            </div>
+
+        </div>
+
+        <div class="topbar-info">
+            Sistema de Gestión Odontológica
+        </div>
+
+    </header>
+
+
+    <!-- ======================================
+         2. ESTRUCTURA PRINCIPAL
+    ======================================= -->
+
+    <div class="dashboard-layout">
+
+        <!-- MENÚ LATERAL -->
+        <aside class="sidebar">
+
+            <nav class="sidebar-menu">
+
+                <!-- INICIO -->
+                <a th:href="@{/}">
+                    <span>⌂</span>
+                    Inicio
+                </a>
+
+                <!-- PACIENTES -->
+                <a th:href="@{/pacientes}">
+                    <span>👥</span>
+                    Pacientes
+                </a>
+
+                <!-- CITAS MÉDICAS -->
+                <a th:href="@{/citas}">
+                    <span>▦</span>
+                    Citas médicas
+                </a>
+
+                <!-- ATENCIONES (ACTIVO) -->
+                <a class="active" th:href="@{/historias}">
+                    <span>✚</span>
+                    Atenciones
+                </a>
+
+            </nav>
+
+            <div class="sidebar-footer">
+                DENTAL · Vital Salud
+            </div>
+
+        </aside>
+
+
+        <!-- ======================================
+             3. CONTENIDO PRINCIPAL
+        ======================================= -->
+
+        <main class="dashboard-main">
+
+            <!-- TÍTULO -->
+            <div class="page-title">
+
+                <div>
+
+                    <span class="eyebrow">
+                        GESTIÓN DE ATENCIONES
+                    </span>
+
+                    <h1>Atenciones médicas</h1>
+
+                    <p>
+                        Consulta y administra los diagnósticos,
+                        tratamientos e historial de atenciones.
+                    </p>
+
+                </div>
+
+                <!-- NUEVA ATENCIÓN -->
+                <a class="btn"
+                   th:href="@{/historias/nuevo}">
+                    + Nueva atención
+                </a>
+
+            </div>
+
+
+            <!-- ======================================
+                 4. PANEL DE ATENCIONES
+            ======================================= -->
+
+            <section class="panel atenciones-panel">
+
+                <!-- BARRA DE BÚSQUEDA -->
+                <div class="atenciones-toolbar">
+
+                    <div class="buscador-atenciones">
+
+                        <span aria-hidden="true">⌕</span>
+
+                        <input
+                            type="search"
+                            id="buscarAtencion"
+                            placeholder="Buscar por paciente o diagnóstico..."
+                            aria-label="Buscar atenciones"
+                        >
+
+                    </div>
+
+                    <!-- CONTADOR -->
+                    <div class="contador-atenciones">
+
+                        <span id="totalAtenciones">
+                            0
+                        </span>
+
+                        atenciones
+
+                    </div>
+
+                </div>
+
+
+                <!-- ======================================
+                     5. TABLA DE ATENCIONES
+                ======================================= -->
+
+                <div class="table-scroll">
+
+                    <table id="tablaAtenciones">
+
+                        <!-- ENCABEZADOS -->
+                        <thead>
+
+                            <tr>
+                                <th>ID</th>
+                                <th>Paciente</th>
+                                <th>Fecha de atención</th>
+                                <th>Diagnóstico</th>
+                                <th>Acciones</th>
+                            </tr>
+
+                        </thead>
+
+
+                        <!-- REGISTROS DESDE SPRING BOOT -->
+                        <tbody>
+
+                            <tr th:each="r : ${registros}"
+                                class="fila-atencion">
+
+                                <!-- ID -->
+                                <td th:text="${r.id}">
+                                    -
+                                </td>
+
+                                <!-- PACIENTE -->
+                                <td th:text="${r.paciente.nombres}">
+                                    -
+                                </td>
+
+                                <!-- FECHA -->
+                                <td th:text="${r.fechaAtencion}">
+                                    -
+                                </td>
+
+                                <!-- DIAGNÓSTICO -->
+                                <td class="diagnostico-columna"
+                                    th:text="${r.diagnostico}">
+                                    -
+                                </td>
+
+
+                                <!-- ACCIONES -->
+                                <td>
+
+                                    <div class="acciones">
+
+                                        <!-- EDITAR -->
+                                        <a class="accion-editar"
+                                           th:href="@{/historias/editar/{id}(id=${r.id})}">
+                                            Editar
+                                        </a>
+
+                                        <!-- ELIMINAR -->
+                                        <form
+                                            method="post"
+                                            th:action="@{/historias/eliminar/{id}(id=${r.id})}"
+                                            onsubmit="return confirm('¿Eliminar esta atención médica?')"
+                                        >
+
+                                            <button
+                                                type="submit"
+                                                class="danger">
+                                                Eliminar
+                                            </button>
+
+                                        </form>
+
+                                    </div>
+
+                                </td>
+
+                            </tr>
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+
+                <!-- MENSAJE CUANDO NO HAY REGISTROS -->
+                <p class="empty"
+                   th:if="${#lists.isEmpty(registros)}">
+                    Todavía no hay atenciones médicas registradas.
+                </p>
+
+
+                <!-- MENSAJE CUANDO LA BÚSQUEDA NO COINCIDE -->
+                <p class="empty"
+                   id="sinResultadosAtenciones"
+                   style="display: none;">
+                    No se encontraron atenciones con esa búsqueda.
+                </p>
+
+            </section>
+
+        </main>
+
+    </div>
+
+
+    <!-- ======================================
+         6. JAVASCRIPT - BUSCADOR
+    ======================================= -->
+
+    <script>
+
+        function filtrarAtenciones() {
+
+            // Texto ingresado por el usuario
+            const texto = document
+                .getElementById("buscarAtencion")
+                .value
+                .toLowerCase()
+                .trim();
+
+            // Obtener filas de la tabla
+            const filas = document.querySelectorAll(
+                "#tablaAtenciones .fila-atencion"
+            );
+
+            let visibles = 0;
+
+            filas.forEach(function (fila) {
+
+                const celdas = fila.querySelectorAll("td");
+
+                // Columna paciente
+                const paciente = celdas[1]
+                    .textContent
+                    .toLowerCase();
+
+                // Columna diagnóstico
+                const diagnostico = celdas[3]
+                    .textContent
+                    .toLowerCase();
+
+                // Verificar coincidencia
+                const coincide =
+                    paciente.includes(texto) ||
+                    diagnostico.includes(texto);
+
+                // Mostrar u ocultar fila
+                fila.style.display =
+                    coincide ? "" : "none";
+
+                if (coincide) {
+                    visibles++;
+                }
+
+            });
+
+            // Actualizar contador
+            document.getElementById(
+                "totalAtenciones"
+            ).textContent = visibles;
+
+            // Mostrar mensaje si no hay coincidencias
+            document.getElementById(
+                "sinResultadosAtenciones"
+            ).style.display =
+                filas.length > 0 && visibles === 0
+                    ? "block"
+                    : "none";
+
+        }
+
+        // Ejecutar al cargar la página
+        document.addEventListener(
+            "DOMContentLoaded",
+            function () {
+
+                document.getElementById(
+                    "buscarAtencion"
+                ).addEventListener(
+                    "input",
+                    filtrarAtenciones
+                );
+
+                filtrarAtenciones();
+
+            }
+        );
+
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,192 @@
+
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Médicos | DENTAL Vital Salud</title>
+
+    <!-- HOJA DE ESTILOS -->
+    <link rel="stylesheet" th:href="@{/css/estilos.css}">
+</head>
+
+<body>
+
+    <!-- ========================================= -->
+    <!-- ENCABEZADO PRINCIPAL -->
+    <!-- ========================================= -->
+    <header class="topbar">
+
+        <div class="brand">
+            <b class="brand-icon">✚</b>
+
+            <strong>
+                Sistema de Gestión Médica Integral
+            </strong>
+
+            <small>Vital Salud</small>
+        </div>
+
+        <div class="topbar-user">
+            Recepción <b>· DENTAL</b>
+        </div>
+
+    </header>
+
+    <!-- CONTENEDOR GENERAL -->
+    <div class="app">
+
+        <!-- ========================================= -->
+        <!-- MENÚ LATERAL -->
+        <!-- ========================================= -->
+        <aside class="sidebar">
+
+            <a th:href="@{/pacientes}">
+                ▣ &nbsp; Pacientes
+            </a>
+
+            <a th:href="@{/citas/nuevo}">
+                ▣ &nbsp; Programar cita
+            </a>
+
+            <a th:href="@{/citas}">
+                ▣ &nbsp; Agenda de citas
+            </a>
+
+            <a th:href="@{/pagos}">
+                ▣ &nbsp; Pago de cita
+            </a>
+
+            <a class="active" th:href="@{/medicos}">
+                ▣ &nbsp; Médicos
+            </a>
+
+            <div class="sidebar-bottom">
+                Sistema de gestión · Vital Salud
+            </div>
+
+        </aside>
+
+        <!-- ========================================= -->
+        <!-- CONTENIDO PRINCIPAL -->
+        <!-- ========================================= -->
+        <main class="main">
+
+            <!-- TÍTULO DE LA PÁGINA -->
+            <div class="page-heading">
+
+                <div>
+                    <div class="breadcrumb">
+                        Administración de médicos
+                    </div>
+
+                    <h1>Médicos</h1>
+                </div>
+
+            </div>
+
+            <!-- MENSAJE DE ERROR -->
+            <div
+                class="note warn"
+                th:if="${error}"
+                th:text="${error}">
+            </div>
+
+            <!-- ========================================= -->
+            <!-- BOTÓN AGREGAR MÉDICO -->
+            <!-- ========================================= -->
+            <div class="panel">
+
+                <a class="btn" th:href="@{/medicos/nuevo}">
+                    + Agregar médico
+                </a>
+
+            </div>
+
+            <!-- ========================================= -->
+            <!-- TABLA DE MÉDICOS REGISTRADOS -->
+            <!-- ========================================= -->
+            <div class="panel">
+
+                <h2>Médicos registrados</h2>
+
+                <div class="table-wrap">
+
+                    <table>
+
+                        <!-- ENCABEZADOS -->
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nombre</th>
+                                <th>Correo</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+
+                        <!-- REGISTROS -->
+                        <tbody>
+
+                            <tr th:each="m : ${medicos}">
+
+                                <!-- ID -->
+                                <td th:text="${m.id}"></td>
+
+                                <!-- NOMBRE -->
+                                <td th:text="${m.nombre}"></td>
+
+                                <!-- CORREO -->
+                                <td th:text="${m.correo}"></td>
+
+                                <!-- ACCIONES -->
+                                <td>
+
+                                    <div class="actions">
+
+                                        <!-- EDITAR MÉDICO -->
+                                        <a
+                                            class="btn light sm"
+                                            th:href="@{/medicos/editar/{id}(id=${m.id})}">
+
+                                            Editar
+
+                                        </a>
+
+                                        <!-- ELIMINAR MÉDICO -->
+                                        <form
+                                            method="post"
+                                            th:action="@{/medicos/eliminar/{id}(id=${m.id})}"
+                                            onsubmit="return confirm('¿Eliminar médico?')">
+
+                                            <button
+                                                class="btn danger sm"
+                                                type="submit">
+
+                                                Eliminar
+
+                                            </button>
+
+                                        </form>
+
+                                    </div>
+
+                                </td>
+
+                            </tr>
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+        </main>
+
+    </div>
+
+</body>
+</html>

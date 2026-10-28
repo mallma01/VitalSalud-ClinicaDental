@@ -1,0 +1,347 @@
+
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Pacientes | DENTAL Vital Salud</title>
+
+    <!-- HOJA DE ESTILOS -->
+    <link rel="stylesheet" th:href="@{/css/estilos.css}">
+</head>
+
+<body>
+
+    <!-- ========================================= -->
+    <!-- ENCABEZADO PRINCIPAL -->
+    <!-- ========================================= -->
+    <header class="topbar">
+
+        <div class="brand">
+            <b class="brand-icon">✚</b>
+
+            <strong>
+                Sistema de Gestión Médica Integral
+            </strong>
+
+            <small>Vital Salud</small>
+        </div>
+
+        <div class="topbar-user">
+            Recepción <b>· DENTAL</b>
+        </div>
+
+    </header>
+
+    <!-- CONTENEDOR GENERAL -->
+    <div class="app">
+
+        <!-- ========================================= -->
+        <!-- MENÚ LATERAL -->
+        <!-- ========================================= -->
+        <aside class="sidebar">
+
+            <a class="active" th:href="@{/pacientes}">
+                ▣ &nbsp; Pacientes
+            </a>
+
+            <a th:href="@{/citas/nuevo}">
+                ▣ &nbsp; Programar cita
+            </a>
+
+            <a th:href="@{/citas}">
+                ▣ &nbsp; Agenda de citas
+            </a>
+
+            <a th:href="@{/pagos}">
+                ▣ &nbsp; Pago de cita
+            </a>
+
+            <a th:href="@{/medicos}">
+                ▣ &nbsp; Médicos
+            </a>
+
+            <div class="sidebar-bottom">
+                Sistema de gestión · Vital Salud
+            </div>
+
+        </aside>
+
+        <!-- ========================================= -->
+        <!-- CONTENIDO PRINCIPAL -->
+        <!-- ========================================= -->
+        <main class="main">
+
+            <!-- TÍTULO Y REGISTRO -->
+            <div class="page-heading">
+
+                <div>
+                    <div class="breadcrumb">
+                        Proceso 2 · Pacientes: búsqueda y listado
+                    </div>
+
+                    <h1>Pacientes</h1>
+                </div>
+
+                <a class="btn" th:href="@{/pacientes/nuevo}">
+                    + Registrar paciente
+                </a>
+
+            </div>
+
+            <!-- ========================================= -->
+            <!-- MENSAJES -->
+            <!-- ========================================= -->
+
+            <!-- MENSAJE DE ÉXITO -->
+            <div
+                class="note"
+                th:if="${ok}"
+                th:text="${ok}">
+            </div>
+
+            <!-- MENSAJE DE ERROR -->
+            <div
+                class="note warn"
+                th:if="${error}"
+                th:text="${error}">
+            </div>
+
+            <!-- ========================================= -->
+            <!-- BUSCADOR Y FILTROS -->
+            <!-- ========================================= -->
+            <div class="panel toolbar">
+
+                <!-- BUSCAR PACIENTE -->
+                <input
+                    class="search"
+                    id="q"
+                    type="text"
+                    placeholder="Buscar por DNI, nombre o apellido"
+                    oninput="filtrar()">
+
+                <!-- FILTRO POR ESTADO -->
+                <select
+                    id="estado"
+                    onchange="filtrar()">
+
+                    <option value="">
+                        Todos los estados
+                    </option>
+
+                    <option value="Activo">
+                        Activo
+                    </option>
+
+                    <option value="Inactivo">
+                        Inactivo
+                    </option>
+
+                </select>
+
+                <!-- BOTÓN BUSCAR -->
+                <button
+                    class="btn"
+                    type="button"
+                    onclick="filtrar()">
+
+                    Buscar
+
+                </button>
+
+            </div>
+
+            <!-- ========================================= -->
+            <!-- TABLA DE PACIENTES -->
+            <!-- ========================================= -->
+            <div class="panel">
+
+                <h2>
+                    Resultados
+                    <span class="status-count" id="total"></span>
+                </h2>
+
+                <div class="table-wrap">
+
+                    <table>
+
+                        <!-- ENCABEZADOS -->
+                        <thead>
+                            <tr>
+                                <th>DNI</th>
+                                <th>PACIENTE</th>
+                                <th>EDAD</th>
+                                <th>CELULAR</th>
+                                <th>FICHA CLÍNICA</th>
+                                <th>ESTADO</th>
+                                <th>ACCIONES: CONSULTAR / EDITAR / ELIMINAR</th>
+                            </tr>
+                        </thead>
+
+                        <!-- REGISTROS DE PACIENTES -->
+                        <tbody>
+
+                            <tr
+                                class="patient-row"
+                                th:each="r : ${registros}"
+                                th:attr="data-search=${r.dni+' '+r.nombres+' '+r.apellidos},
+                                         data-estado=${r.estado == null ? 'Activo' : r.estado}">
+
+                                <!-- DNI -->
+                                <td th:text="${r.dni}"></td>
+
+                                <!-- NOMBRE COMPLETO -->
+                                <td th:text="${r.nombres+' '+r.apellidos}"></td>
+
+                                <!-- EDAD -->
+                                <td th:text="${r.edadCalculada != null ? r.edadCalculada : '—'}"></td>
+
+                                <!-- CELULAR -->
+                                <td th:text="${r.telefono}"></td>
+
+                                <!-- ESTADO DE FICHA CLÍNICA -->
+                                <td>
+
+                                    <span
+                                        class="tag"
+                                        th:classappend="${r.fechaNacimiento == null} ? 'yellow'"
+                                        th:text="${r.fechaNacimiento == null} ? 'Incompleta' : 'Completa'">
+                                    </span>
+
+                                </td>
+
+                                <!-- ESTADO DEL PACIENTE -->
+                                <td>
+
+                                    <span
+                                        class="tag"
+                                        th:classappend="${r.estado == 'Inactivo'} ? 'gray'"
+                                        th:text="${r.estado == null} ? 'Activo' : ${r.estado}">
+                                    </span>
+
+                                </td>
+
+                                <!-- ========================================= -->
+                                <!-- ACCIONES -->
+                                <!-- ========================================= -->
+                                <td>
+
+                                    <!-- EDITAR PACIENTE -->
+                                    <a
+                                        class="btn light sm"
+                                        th:href="@{/pacientes/editar/{id}(id=${r.id})}">
+
+                                        Editar
+
+                                    </a>
+
+                                    <!-- ELIMINAR O DESACTIVAR PACIENTE -->
+                                    <form
+                                        style="display:inline"
+                                        method="post"
+                                        th:if="${r.estado != 'Inactivo'}"
+                                        th:action="@{/pacientes/eliminar/{id}(id=${r.id})}"
+                                        onsubmit="return confirm('¿Eliminar este paciente? Si tiene historial se desactivará.')">
+
+                                        <button
+                                            class="btn danger sm"
+                                            type="submit">
+
+                                            Eliminar
+
+                                        </button>
+
+                                    </form>
+
+                                    <!-- ACTIVAR PACIENTE -->
+                                    <form
+                                        style="display:inline"
+                                        method="post"
+                                        th:if="${r.estado == 'Inactivo'}"
+                                        th:action="@{/pacientes/activar/{id}(id=${r.id})}">
+
+                                        <button
+                                            class="btn light sm"
+                                            type="submit">
+
+                                            Activar
+
+                                        </button>
+
+                                    </form>
+
+                                </td>
+
+                            </tr>
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+            <!-- NOTA INFORMATIVA -->
+            <div class="note">
+                ¿No aparece el paciente?
+                Si el DNI no existe, utiliza «Registrar paciente»
+                para crear su ficha.
+            </div>
+
+        </main>
+
+    </div>
+
+    <!-- ========================================= -->
+    <!-- JAVASCRIPT: BUSCADOR DE PACIENTES -->
+    <!-- ========================================= -->
+    <script>
+
+        function filtrar() {
+
+            // Obtener texto de búsqueda
+            const q = document
+                .getElementById('q')
+                .value
+                .toLowerCase();
+
+            // Obtener estado seleccionado
+            const e = document
+                .getElementById('estado')
+                .value;
+
+            let n = 0;
+
+            // Recorrer pacientes
+            document.querySelectorAll('.patient-row').forEach(r => {
+
+                const ok =
+                    r.dataset.search.toLowerCase().includes(q)
+                    &&
+                    (!e || r.dataset.estado === e);
+
+                // Mostrar u ocultar fila
+                r.hidden = !ok;
+
+                // Contar resultados visibles
+                if (ok) {
+                    n++;
+                }
+
+            });
+
+            // Actualizar contador
+            document.getElementById('total').textContent =
+                n + ' pacientes';
+        }
+
+        // Ejecutar filtro al cargar la página
+        filtrar();
+
+    </script>
+
+</body>
+</html>

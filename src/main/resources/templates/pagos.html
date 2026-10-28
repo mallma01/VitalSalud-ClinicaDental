@@ -1,0 +1,764 @@
+
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Pago de cita | DENTAL Vital Salud</title>
+
+    <!-- HOJA DE ESTILOS -->
+    <link rel="stylesheet" th:href="@{/css/estilos.css}">
+</head>
+
+<body>
+
+    <!-- ========================================= -->
+    <!-- ENCABEZADO PRINCIPAL -->
+    <!-- ========================================= -->
+    <header class="topbar">
+
+        <div class="brand">
+            <b class="brand-icon">✚</b>
+            <strong>Sistema de Gestión Médica Integral</strong>
+            <small>Vital Salud</small>
+        </div>
+
+        <div class="topbar-user">
+            Recepción <b>· DENTAL</b>
+        </div>
+
+    </header>
+
+    <div class="app">
+
+        <!-- ========================================= -->
+        <!-- MENÚ LATERAL -->
+        <!-- ========================================= -->
+        <aside class="sidebar">
+
+            <a th:href="@{/pacientes}">
+                ▣ &nbsp; Pacientes
+            </a>
+
+            <a th:href="@{/citas/nuevo}">
+                ▣ &nbsp; Programar cita
+            </a>
+
+            <a th:href="@{/citas}">
+                ▣ &nbsp; Agenda de citas
+            </a>
+
+            <a class="active" th:href="@{/pagos}">
+                ▣ &nbsp; Pago de cita
+            </a>
+
+            <a th:href="@{/medicos}">
+                ▣ &nbsp; Médicos
+            </a>
+
+            <div class="sidebar-bottom">
+                Sistema de gestión · Vital Salud
+            </div>
+
+        </aside>
+
+        <!-- ========================================= -->
+        <!-- CONTENIDO PRINCIPAL -->
+        <!-- ========================================= -->
+        <main class="main">
+
+            <!-- TÍTULO -->
+            <div class="page-heading">
+                <div>
+                    <div class="breadcrumb">
+                        Proceso 4 · Pago de cita
+                    </div>
+
+                    <h1>Pago de cita</h1>
+
+                    <p class="subtle">
+                        Busca al paciente, selecciona su cita
+                        y confirma el pago recibido.
+                    </p>
+                </div>
+            </div>
+
+            <!-- MENSAJES -->
+            <div class="note"
+                 th:if="${ok}"
+                 th:text="${ok}">
+            </div>
+
+            <div class="note warn"
+                 th:if="${error}"
+                 th:text="${error}">
+            </div>
+
+            <!-- ========================================= -->
+            <!-- SECCIÓN DE BÚSQUEDA Y REGISTRO -->
+            <!-- ========================================= -->
+            <div class="payment-layout">
+
+                <!-- BUSCAR PACIENTE Y CITA -->
+                <section class="panel">
+
+                    <h2>Buscar paciente y cita</h2>
+
+                    <label class="field">
+                        Buscar por DNI, nombre o apellido
+
+                        <input
+                            id="buscarPaciente"
+                            type="search"
+                            placeholder="Escribe el DNI o nombre del paciente"
+                            autocomplete="off">
+                    </label>
+
+                    <!-- CITAS PENDIENTES -->
+                    <label class="field" style="margin-top:12px">
+                        Citas pendientes de pago
+
+                        <select
+                            id="citaId"
+                            form="formPago"
+                            name="citaId"
+                            required>
+
+                            <option value="">
+                                Selecciona una cita pendiente
+                            </option>
+
+                            <option
+                                th:each="c : ${citasPendientes}"
+                                th:value="${c.id}"
+                                th:attr="
+                                    data-nombre=${c.paciente.nombres+' '+c.paciente.apellidos},
+                                    data-dni=${c.paciente.dni},
+                                    data-fecha=${c.fecha},
+                                    data-hora=${c.hora},
+                                    data-medico=${c.medico != null ? c.medico.nombre : 'No asignado'},
+                                    data-especialidad=${c.especialidad},
+                                    data-estado=${c.estado},
+                                    data-monto=${c.montoConsulta}"
+                                th:text="${c.paciente.nombres+' '+c.paciente.apellidos+' · DNI '+c.paciente.dni+' · '+c.fecha+' '+c.hora}">
+                            </option>
+
+                        </select>
+                    </label>
+
+                    <p id="sinCoincidencias"
+                       class="subtle"
+                       hidden>
+                        No hay citas pendientes que coincidan con la búsqueda.
+                    </p>
+
+                    <p class="subtle"
+                       th:if="${#lists.isEmpty(citasPendientes)}">
+                        No hay citas pendientes.
+                        Programa una cita o revisa la agenda.
+                    </p>
+
+                    <!-- DETALLE DE LA CITA -->
+                    <div
+                        class="payment-detail"
+                        id="detalleCita"
+                        aria-live="polite">
+
+                        <div>
+                            <span>Paciente</span>
+                            <strong id="dPaciente">—</strong>
+                        </div>
+
+                        <div>
+                            <span>DNI</span>
+                            <strong id="dDni">—</strong>
+                        </div>
+
+                        <div>
+                            <span>Fecha y hora</span>
+                            <strong id="dFecha">—</strong>
+                        </div>
+
+                        <div>
+                            <span>Médico</span>
+                            <strong id="dMedico">—</strong>
+                        </div>
+
+                        <div>
+                            <span>Especialidad</span>
+                            <strong id="dEspecialidad">—</strong>
+                        </div>
+
+                        <div>
+                            <span>Estado</span>
+                            <strong id="dEstado">—</strong>
+                        </div>
+
+                    </div>
+
+                </section>
+
+                <!-- ========================================= -->
+                <!-- FORMULARIO DE PAGO -->
+                <!-- ========================================= -->
+                <section class="panel">
+
+                    <h2>Registrar pago</h2>
+
+                    <form
+                        id="formPago"
+                        method="post"
+                        th:action="@{/pagos/registrar}"
+                        onsubmit="return confirmarCobro(event)">
+
+                        <!-- MÉTODO DE PAGO -->
+                        <p class="payment-caption">
+                            MÉTODO DE PAGO
+                        </p>
+
+                        <div class="payment-methods">
+
+                            <label>
+                                <input type="radio"
+                                       name="metodo"
+                                       value="EFECTIVO"
+                                       checked>
+                                Efectivo
+                            </label>
+
+                            <label>
+                                <input type="radio"
+                                       name="metodo"
+                                       value="TARJETA">
+                                Tarjeta
+                            </label>
+
+                            <label>
+                                <input type="radio"
+                                       name="metodo"
+                                       value="YAPE">
+                                Yape
+                            </label>
+
+                            <label>
+                                <input type="radio"
+                                       name="metodo"
+                                       value="PLIN">
+                                Plin
+                            </label>
+
+                            <label>
+                                <input type="radio"
+                                       name="metodo"
+                                       value="TRANSFERENCIA">
+                                Transferencia
+                            </label>
+
+                        </div>
+
+                        <!-- MONTOS -->
+                        <div class="payment-fields">
+
+                            <label class="field">
+                                Monto de la consulta (S/)
+
+                                <input
+                                    id="monto"
+                                    name="monto"
+                                    type="number"
+                                    step="0.01"
+                                    min="0.01"
+                                    required
+                                    readonly
+                                    placeholder="0.00">
+                            </label>
+
+                            <label class="field">
+                                Monto recibido (S/)
+
+                                <input
+                                    id="recibido"
+                                    name="recibido"
+                                    type="number"
+                                    step="0.01"
+                                    min="0"
+                                    required
+                                    placeholder="Digita el monto">
+                            </label>
+
+                            <label class="field">
+                                Vuelto (S/)
+
+                                <input
+                                    id="vuelto"
+                                    type="text"
+                                    readonly
+                                    value="0.00">
+                            </label>
+
+                        </div>
+
+                        <!-- REFERENCIA -->
+                        <label class="field" style="margin-top:12px">
+                            Referencia / número de operación (opcional)
+
+                            <input
+                                name="referencia"
+                                maxlength="150"
+                                placeholder="Ej.: operación Yape 123456">
+                        </label>
+
+                        <!-- AYUDA -->
+                        <p id="ayudaMonto" class="subtle">
+                            En efectivo, digita el dinero recibido.
+                            En otros métodos, ingresa el importe exacto.
+                        </p>
+
+                        <!-- BOTONES -->
+                        <div class="toolbar">
+
+                            <button
+                                id="confirmar"
+                                class="btn"
+                                type="submit"
+                                th:disabled="${#lists.isEmpty(citasPendientes)}">
+                                Confirmar pago
+                            </button>
+
+                            <button
+                                type="button"
+                                class="btn light"
+                                id="limpiar">
+                                Limpiar
+                            </button>
+
+                        </div>
+
+                    </form>
+
+                </section>
+
+            </div>
+
+            <!-- ========================================= -->
+            <!-- HISTORIAL DE PAGOS -->
+            <!-- ========================================= -->
+            <section class="panel">
+
+                <div class="payment-section-head">
+
+                    <div>
+                        <h2>Historial de pagos</h2>
+
+                        <p class="subtle">
+                            Registro interno en MySQL.
+                            No procesa pagos bancarios ni emite comprobantes SUNAT.
+                        </p>
+                    </div>
+
+                    <input
+                        id="buscarPago"
+                        class="search"
+                        type="search"
+                        placeholder="Buscar pago por paciente, DNI o método">
+
+                </div>
+
+                <div class="table-wrap">
+
+                    <table>
+
+                        <thead>
+                            <tr>
+                                <th>N.º</th>
+                                <th>Fecha de pago</th>
+                                <th>Paciente</th>
+                                <th>Cita</th>
+                                <th>Monto</th>
+                                <th>Método</th>
+                                <th>Estado</th>
+                                <th>Acción</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+
+                            <tr
+                                th:each="p : ${pagos}"
+                                class="fila-pago"
+                                th:attr="data-busqueda=${p.cita.paciente.nombres+' '+p.cita.paciente.apellidos+' '+p.cita.paciente.dni+' '+p.metodo}">
+
+                                <td th:text="${p.id}"></td>
+
+                                <td th:text="${#temporals.format(p.fechaPago,'dd/MM/yyyy HH:mm')}"></td>
+
+                                <td th:text="${p.cita.paciente.nombres+' '+p.cita.paciente.apellidos}"></td>
+
+                                <td th:text="${p.cita.fecha+' '+p.cita.hora}"></td>
+
+                                <td th:text="${'S/ '+p.monto}"></td>
+
+                                <td th:text="${p.metodo}"></td>
+
+                                <td>
+                                    <span class="tag">Pagado</span>
+                                </td>
+
+                                <td>
+
+                                    <button
+                                        type="button"
+                                        class="btn light sm"
+                                        th:attr="
+                                            data-num=${p.id},
+                                            data-fecha=${#temporals.format(p.fechaPago,'dd/MM/yyyy HH:mm')},
+                                            data-paciente=${p.cita.paciente.nombres+' '+p.cita.paciente.apellidos},
+                                            data-dni=${p.cita.paciente.dni},
+                                            data-cita=${p.cita.fecha+' '+p.cita.hora},
+                                            data-monto=${p.monto},
+                                            data-metodo=${p.metodo},
+                                            data-referencia=${p.referencia}"
+                                        onclick="verComprobante(this)">
+
+                                        Ver comprobante
+
+                                    </button>
+
+                                </td>
+
+                            </tr>
+
+                            <!-- SIN PAGOS REGISTRADOS -->
+                            <tr th:if="${#lists.isEmpty(pagos)}">
+                                <td colspan="8" class="empty">
+                                    Todavía no hay pagos registrados.
+                                </td>
+                            </tr>
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </section>
+
+            <!-- ========================================= -->
+            <!-- COMPROBANTE INTERNO -->
+            <!-- ========================================= -->
+            <section
+                class="panel"
+                id="comprobantePanel"
+                hidden>
+
+                <div class="payment-section-head">
+
+                    <h2>Comprobante interno</h2>
+
+                    <button
+                        class="btn"
+                        type="button"
+                        onclick="imprimirComprobante()">
+
+                        Imprimir / Guardar PDF
+
+                    </button>
+
+                </div>
+
+                <div class="receipt" id="comprobante">
+
+                    <strong>VITAL SALUD · DENTAL</strong>
+
+                    <div>
+                        Comprobante interno N.º
+                        <span id="rNumero"></span>
+                    </div>
+
+                    <div>
+                        Fecha: <span id="rFecha"></span>
+                    </div>
+
+                    <div>
+                        Paciente: <span id="rPaciente"></span>
+                    </div>
+
+                    <div>
+                        DNI: <span id="rDni"></span>
+                    </div>
+
+                    <div>
+                        Cita: <span id="rCita"></span>
+                    </div>
+
+                    <div>
+                        Método: <span id="rMetodo"></span>
+                    </div>
+
+                    <div>
+                        Referencia: <span id="rReferencia"></span>
+                    </div>
+
+                    <strong>
+                        Total: S/ <span id="rMonto"></span>
+                    </strong>
+
+                </div>
+
+                <p class="subtle">
+                    Documento de control interno;
+                    no es comprobante electrónico SUNAT.
+                </p>
+
+            </section>
+
+        </main>
+
+    </div>
+
+    <!-- ========================================= -->
+    <!-- JAVASCRIPT -->
+    <!-- ========================================= -->
+    <script>
+
+        (function () {
+
+            // ELEMENTOS PRINCIPALES
+            const buscar = document.getElementById('buscarPaciente');
+            const sel = document.getElementById('citaId');
+
+            const opciones = Array.from(sel.options).slice(1);
+
+            const recibido = document.getElementById('recibido');
+            const monto = document.getElementById('monto');
+            const vuelto = document.getElementById('vuelto');
+
+            // NORMALIZAR TEXTO
+            function normalizar(t) {
+                return (t || '')
+                    .toLowerCase()
+                    .normalize('NFD')
+                    .replace(/[\u0300-\u036f]/g, '');
+            }
+
+            // FILTRAR PACIENTES
+            function filtrar() {
+
+                const q = normalizar(buscar.value.trim());
+
+                let visibles = 0;
+
+                opciones.forEach(o => {
+
+                    const match = normalizar(
+                        o.dataset.nombre + ' ' + o.dataset.dni
+                    ).includes(q);
+
+                    o.hidden = !match;
+                    o.disabled = !match;
+
+                    if (match) {
+                        visibles++;
+                    }
+
+                });
+
+                if (
+                    sel.selectedOptions[0] &&
+                    sel.selectedOptions[0].disabled
+                ) {
+                    sel.value = '';
+                }
+
+                document.getElementById('sinCoincidencias').hidden =
+                    visibles > 0 || !q;
+
+                actualizar();
+            }
+
+            // ACTUALIZAR DETALLE DE LA CITA
+            function actualizar() {
+
+                const o = sel.selectedOptions[0];
+                const d = o && o.value ? o.dataset : {};
+
+                const texto = (id, v) => {
+                    document.getElementById(id).textContent = v || '—';
+                };
+
+                texto('dPaciente', d.nombre);
+                texto('dDni', d.dni);
+                texto('dFecha', d.fecha ? d.fecha + ' · ' + d.hora : '');
+                texto('dMedico', d.medico);
+                texto('dEspecialidad', d.especialidad);
+                texto('dEstado', d.estado);
+
+                monto.value = d.monto || '';
+                recibido.value = '';
+
+                calcular();
+            }
+
+            // CALCULAR VUELTO
+            function calcular() {
+
+                const costo = Number(monto.value);
+                const entregado = Number(recibido.value);
+
+                const efectivo =
+                    document.querySelector(
+                        'input[name="metodo"]:checked'
+                    ).value === 'EFECTIVO';
+
+                vuelto.value =
+                    efectivo && entregado >= costo && costo > 0
+                        ? (entregado - costo).toFixed(2)
+                        : '0.00';
+
+                document.getElementById('ayudaMonto').textContent =
+                    efectivo
+                        ? 'En efectivo, digita el dinero recibido para calcular el vuelto.'
+                        : 'Para pagos no efectivos, el monto recibido debe ser igual al importe de la consulta.';
+            }
+
+            // EVENTOS
+            buscar.addEventListener('input', filtrar);
+
+            sel.addEventListener('change', actualizar);
+
+            recibido.addEventListener('input', calcular);
+
+            document.querySelectorAll(
+                'input[name="metodo"]'
+            ).forEach(x => {
+                x.addEventListener('change', calcular);
+            });
+
+            // LIMPIAR FORMULARIO
+            document.getElementById('limpiar').addEventListener(
+                'click',
+                () => {
+
+                    buscar.value = '';
+
+                    filtrar();
+
+                    sel.value = '';
+
+                    actualizar();
+
+                    document.getElementById('formPago').reset();
+
+                    actualizar();
+                }
+            );
+
+            // CONFIRMAR COBRO
+            window.confirmarCobro = function () {
+
+                const costo = Number(monto.value);
+                const entregado = Number(recibido.value);
+
+                const efectivo =
+                    document.querySelector(
+                        'input[name="metodo"]:checked'
+                    ).value === 'EFECTIVO';
+
+                if (!sel.value) {
+                    alert('Selecciona una cita pendiente.');
+                    return false;
+                }
+
+                if (
+                    !Number.isFinite(costo) ||
+                    costo <= 0 ||
+                    !Number.isFinite(entregado) ||
+                    entregado < costo
+                ) {
+                    alert(
+                        'El monto recibido debe cubrir el costo de la cita.'
+                    );
+                    return false;
+                }
+
+                if (
+                    !efectivo &&
+                    Math.abs(entregado - costo) > 0.001
+                ) {
+                    alert(
+                        'Para este método, ingresa el importe exacto de la consulta.'
+                    );
+                    return false;
+                }
+
+                return confirm(
+                    '¿Confirmas que recibiste el pago de S/ ' +
+                    costo.toFixed(2) + '?'
+                );
+            };
+
+            // BUSCAR EN HISTORIAL DE PAGOS
+            const buscarPago = document.getElementById('buscarPago');
+
+            buscarPago.addEventListener('input', () => {
+
+                const q = normalizar(buscarPago.value);
+
+                document.querySelectorAll('.fila-pago').forEach(tr => {
+
+                    tr.hidden = !normalizar(
+                        tr.dataset.busqueda
+                    ).includes(q);
+
+                });
+
+            });
+
+            // INICIALIZAR DETALLES
+            actualizar();
+
+        })();
+
+        // =========================================
+        // MOSTRAR COMPROBANTE
+        // =========================================
+        function verComprobante(b) {
+
+            const d = b.dataset;
+
+            const campos = {
+                rNumero: d.num,
+                rFecha: d.fecha,
+                rPaciente: d.paciente,
+                rDni: d.dni,
+                rCita: d.cita,
+                rMonto: d.monto,
+                rMetodo: d.metodo,
+                rReferencia: d.referencia || '—'
+            };
+
+            Object.entries(campos).forEach(([id, v]) => {
+                document.getElementById(id).textContent = v;
+            });
+
+            document.getElementById('comprobantePanel').hidden = false;
+
+            document.getElementById('comprobantePanel').scrollIntoView({
+                behavior: 'smooth',
+                block: 'nearest'
+            });
+        }
+
+        // =========================================
+        // IMPRIMIR COMPROBANTE
+        // =========================================
+        function imprimirComprobante() {
+            window.print();
+        }
+
+    </script>
+
+</body>
+</html>

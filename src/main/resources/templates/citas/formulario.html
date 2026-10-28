@@ -1,0 +1,550 @@
+
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Programar cita | DENTAL Vital Salud</title>
+
+    <!-- HOJA DE ESTILOS -->
+    <link rel="stylesheet" th:href="@{/css/estilos.css}">
+</head>
+
+<body>
+
+    <!-- ========================================= -->
+    <!-- ENCABEZADO PRINCIPAL -->
+    <!-- ========================================= -->
+    <header class="topbar">
+
+        <div class="brand">
+            <b class="brand-icon">✚</b>
+
+            <strong>
+                Sistema de Gestión Médica Integral
+            </strong>
+
+            <small>Vital Salud</small>
+        </div>
+
+        <div class="topbar-user">
+            Recepción <b>· DENTAL</b>
+        </div>
+
+    </header>
+
+    <!-- CONTENEDOR GENERAL -->
+    <div class="app">
+
+        <!-- ========================================= -->
+        <!-- MENÚ LATERAL -->
+        <!-- ========================================= -->
+        <aside class="sidebar">
+
+            <a th:href="@{/pacientes}">
+                ▣ &nbsp; Pacientes
+            </a>
+
+            <a class="active" th:href="@{/citas/nuevo}">
+                ▣ &nbsp; Programar cita
+            </a>
+
+            <a th:href="@{/citas}">
+                ▣ &nbsp; Agenda de citas
+            </a>
+
+            <a th:href="@{/pagos}">
+                ▣ &nbsp; Pago de cita
+            </a>
+
+            <a th:href="@{/medicos}">
+                ▣ &nbsp; Médicos
+            </a>
+
+            <div class="sidebar-bottom">
+                Sistema de gestión · Vital Salud
+            </div>
+
+        </aside>
+
+        <!-- ========================================= -->
+        <!-- CONTENIDO PRINCIPAL -->
+        <!-- ========================================= -->
+        <main class="main">
+
+            <!-- TÍTULO -->
+            <div class="page-heading">
+
+                <div>
+                    <div class="breadcrumb">
+                        Proceso 3 · Programación de citas
+                    </div>
+
+                    <h1>Programar cita</h1>
+                </div>
+
+            </div>
+
+            <!-- MENSAJE DE ERROR -->
+            <div
+                class="note warn"
+                th:if="${error}"
+                th:text="${error}">
+            </div>
+
+            <!-- ========================================= -->
+            <!-- FORMULARIO DE CITA -->
+            <!-- ========================================= -->
+            <form
+                id="citaForm"
+                method="post"
+                th:action="@{/citas/guardar}"
+                th:object="${registro}">
+
+                <!-- ID OCULTO PARA EDICIÓN -->
+                <input
+                    type="hidden"
+                    name="id"
+                    th:value="*{id}">
+
+                <!-- ========================================= -->
+                <!-- PRIMERA FILA -->
+                <!-- ========================================= -->
+                <div class="grid two">
+
+                    <!-- 1. PACIENTE -->
+                    <section class="panel">
+
+                        <h2>1. Paciente</h2>
+
+                        <label class="field">
+                            Paciente
+
+                            <select
+                                name="pacienteId"
+                                id="pacienteId"
+                                required>
+
+                                <option value="">
+                                    Seleccionar paciente
+                                </option>
+
+                                <option
+                                    th:each="p : ${pacientes}"
+                                    th:value="${p.id}"
+                                    th:text="${p.nombres+' '+p.apellidos+' · '+p.dni}"
+                                    th:selected="${registro.paciente != null and registro.paciente.id == p.id}">
+                                </option>
+
+                            </select>
+
+                        </label>
+
+                    </section>
+
+                    <!-- ========================================= -->
+                    <!-- 2. ESPECIALIDAD Y MÉDICO -->
+                    <!-- ========================================= -->
+                    <section class="panel">
+
+                        <h2>2. Especialidad y médico</h2>
+
+                        <div class="grid two">
+
+                            <!-- ESPECIALIDAD -->
+                            <label class="field">
+                                Especialidad
+
+                                <input
+                                    type="text"
+                                    name="especialidad"
+                                    required
+                                    th:value="*{especialidad}"
+                                    placeholder="Medicina general">
+                            </label>
+
+                            <!-- MÉDICO -->
+                            <label class="field">
+                                Médico
+
+                                <select
+                                    name="medicoId"
+                                    id="medicoId"
+                                    required>
+
+                                    <option value="">
+                                        Selecciona un médico
+                                    </option>
+
+                                    <option
+                                        th:each="m : ${medicos}"
+                                        th:value="${m.id}"
+                                        th:text="${m.nombre}"
+                                        th:selected="${registro.medico != null and registro.medico.id == m.id}">
+                                    </option>
+
+                                </select>
+
+                            </label>
+
+                        </div>
+
+                        <!-- ESTADO (SOLO EDICIÓN) -->
+                        <label
+                            class="field"
+                            th:if="${registro.id != null}">
+
+                            Estado
+
+                            <select name="estado">
+
+                                <option
+                                    value="PENDIENTE_PAGO"
+                                    th:selected="${registro.estado == 'PENDIENTE_PAGO'}">
+                                    Pendiente de pago
+                                </option>
+
+                                <option
+                                    value="PROGRAMADA"
+                                    th:selected="${registro.estado == 'PROGRAMADA'}">
+                                    Programada
+                                </option>
+
+                                <option
+                                    value="ATENDIDA"
+                                    th:selected="${registro.estado == 'ATENDIDA'}">
+                                    Atendida
+                                </option>
+
+                                <option
+                                    value="CANCELADA"
+                                    th:selected="${registro.estado == 'CANCELADA'}">
+                                    Cancelada
+                                </option>
+
+                            </select>
+
+                        </label>
+
+                        <p class="subtle">
+                            Precio de consulta referencial: S/ 60.00
+                        </p>
+
+                    </section>
+
+                </div>
+
+                <!-- ========================================= -->
+                <!-- SEGUNDA FILA -->
+                <!-- ========================================= -->
+                <div class="grid two">
+
+                    <!-- ========================================= -->
+                    <!-- 3. FECHA Y HORARIO -->
+                    <!-- ========================================= -->
+                    <section class="panel">
+
+                        <h2>3. Elige fecha y hora</h2>
+
+                        <!-- FECHA -->
+                        <label class="field">
+                            Fecha
+
+                            <input
+                                type="date"
+                                name="fecha"
+                                id="fecha"
+                                required
+                                th:value="*{fecha}">
+                        </label>
+
+                        <p class="subtle section-title">
+                            Horarios de 30 minutos
+                        </p>
+
+                        <!-- HORARIOS DISPONIBLES -->
+                        <div
+                            class="slot-grid"
+                            id="slots">
+                        </div>
+
+                        <!-- HORA SELECCIONADA -->
+                        <input
+                            type="hidden"
+                            name="hora"
+                            id="hora"
+                            th:value="*{hora}">
+
+                        <p class="subtle">
+                            La disponibilidad se valida al guardar la cita.
+                        </p>
+
+                    </section>
+
+                    <!-- ========================================= -->
+                    <!-- 4. RESUMEN DE LA CITA -->
+                    <!-- ========================================= -->
+                    <section class="panel">
+
+                        <h2>Resumen de la cita</h2>
+
+                        <p id="resumen" class="subtle">
+                            Selecciona paciente, médico, fecha y hora.
+                        </p>
+
+                        <div class="note warn">
+                            La cita queda pendiente de pago.
+                            El cobro se registra desde la agenda.
+                        </div>
+
+                        <!-- BOTONES -->
+                        <button
+                            class="btn"
+                            type="submit">
+
+                            Guardar cita
+
+                        </button>
+
+                        <a
+                            class="btn light"
+                            th:href="@{/citas}">
+
+                            Cancelar
+
+                        </a>
+
+                    </section>
+
+                </div>
+
+            </form>
+
+        </main>
+
+    </div>
+
+    <!-- ========================================= -->
+    <!-- JAVASCRIPT: PROGRAMACIÓN DE CITAS -->
+    <!-- ========================================= -->
+    <script>
+
+        // =========================================
+        // 1. HORARIOS DISPONIBLES
+        // =========================================
+        const horarios = [
+            '08:00',
+            '08:30',
+            '09:00',
+            '09:30',
+            '10:00',
+            '10:30',
+            '11:00',
+            '11:30',
+            '12:00',
+            '12:30',
+            '15:00',
+            '15:30',
+            '16:00'
+        ];
+
+        // =========================================
+        // 2. ELEMENTOS DEL FORMULARIO
+        // =========================================
+        const hora = document.getElementById('hora');
+        const medico = document.getElementById('medicoId');
+        const paciente = document.getElementById('pacienteId');
+        const fecha = document.getElementById('fecha');
+
+        const id = document.querySelector(
+            'input[name="id"]'
+        ).value;
+
+        let ocupados = [];
+
+        // =========================================
+        // 3. MOSTRAR HORARIOS
+        // =========================================
+        function slots() {
+
+            document.getElementById('slots').innerHTML =
+                horarios.map(h => {
+
+                    const seleccionado =
+                        hora.value.slice(0, 5) === h;
+
+                    const ocupado =
+                        ocupados.includes(h);
+
+                    return `
+                        <button
+                            type="button"
+                            class="slot ${seleccionado ? 'active' : ''}"
+                            ${ocupado ? 'disabled title="Horario ocupado"' : ''}
+                            data-hora="${h}">
+
+                            ${h}${ocupado ? ' · Ocupado' : ''}
+
+                        </button>
+                    `;
+
+                }).join('');
+
+            // EVENTO AL SELECCIONAR HORARIO
+            document.querySelectorAll('[data-hora]').forEach(b => {
+
+                b.addEventListener('click', () => {
+
+                    hora.value = b.dataset.hora;
+
+                    slots();
+
+                });
+
+            });
+
+            // ACTUALIZAR RESUMEN
+            document.getElementById('resumen').textContent =
+                (paciente.selectedOptions[0]?.textContent || '') +
+                ' · ' +
+                (medico.selectedOptions[0]?.textContent || '') +
+                ' · ' +
+                fecha.value +
+                ' ' +
+                hora.value;
+        }
+
+        // =========================================
+        // 4. CONSULTAR DISPONIBILIDAD
+        // =========================================
+        async function actualizarDisponibilidad() {
+
+            ocupados = [];
+            hora.value = '';
+
+            slots();
+
+            if (!fecha.value || !medico.value) {
+                return;
+            }
+
+            const params = new URLSearchParams({
+                fecha: fecha.value,
+                medicoId: medico.value
+            });
+
+            if (paciente.value) {
+                params.set('pacienteId', paciente.value);
+            }
+
+            if (id) {
+                params.set('excluirId', id);
+            }
+
+            try {
+
+                const response = await fetch(
+                    '/citas/ocupados?' + params
+                );
+
+                if (!response.ok) {
+                    throw new Error(
+                        'No se pudo consultar disponibilidad'
+                    );
+                }
+
+                ocupados = await response.json();
+
+                slots();
+
+            } catch (err) {
+
+                console.error(err);
+
+                alert(
+                    'No se pudo comprobar la disponibilidad. ' +
+                    'Inténtalo nuevamente.'
+                );
+
+            }
+        }
+
+        // =========================================
+        // 5. EVENTOS DE CAMBIO
+        // =========================================
+        [
+            'pacienteId',
+            'medicoId',
+            'fecha'
+        ].forEach(x => {
+
+            document.getElementById(x).addEventListener(
+                'change',
+                actualizarDisponibilidad
+            );
+
+        });
+
+        // =========================================
+        // 6. FECHA MÍNIMA: HOY
+        // =========================================
+        const hoy = new Date();
+
+        const localHoy = [
+            hoy.getFullYear(),
+            String(hoy.getMonth() + 1).padStart(2, '0'),
+            String(hoy.getDate()).padStart(2, '0')
+        ].join('-');
+
+        fecha.min = localHoy;
+
+        // =========================================
+        // 7. VALIDAR ANTES DE GUARDAR
+        // =========================================
+        document.getElementById('citaForm').addEventListener(
+            'submit',
+            e => {
+
+                if (
+                    !medico.value ||
+                    !hora.value ||
+                    ocupados.includes(hora.value.slice(0, 5))
+                ) {
+
+                    e.preventDefault();
+
+                    alert(
+                        'Selecciona un médico y un horario disponible.'
+                    );
+
+                }
+
+            }
+        );
+
+        // =========================================
+        // 8. CONSERVAR HORARIO AL EDITAR
+        // =========================================
+        const horaInicial = hora.value;
+
+        actualizarDisponibilidad().then(() => {
+
+            if (
+                horaInicial &&
+                !ocupados.includes(horaInicial.slice(0, 5))
+            ) {
+
+                hora.value = horaInicial;
+
+                slots();
+
+            }
+
+        });
+
+    </script>
+
+</body>
+</html>

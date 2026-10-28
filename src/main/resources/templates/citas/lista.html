@@ -1,0 +1,336 @@
+
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Agenda de citas | DENTAL Vital Salud</title>
+
+    <link rel="stylesheet" th:href="@{/css/estilos.css}">
+</head>
+
+<body>
+
+    <!-- ENCABEZADO -->
+    <header class="topbar">
+        <div class="brand">
+            <b class="brand-icon">✚</b>
+            <strong>Sistema de Gestión Médica Integral</strong>
+            <small>Vital Salud</small>
+        </div>
+
+        <div class="topbar-user">
+            Recepción <b>· DENTAL</b>
+        </div>
+    </header>
+
+    <div class="app">
+
+        <!-- MENÚ LATERAL -->
+        <aside class="sidebar">
+
+            <a th:href="@{/pacientes}">
+                ▣ &nbsp; Pacientes
+            </a>
+
+            <a th:href="@{/citas/nuevo}">
+                ▣ &nbsp; Programar cita
+            </a>
+
+            <a class="active" th:href="@{/citas}">
+                ▣ &nbsp; Agenda de citas
+            </a>
+
+            <a th:href="@{/pagos}">
+                ▣ &nbsp; Pago de cita
+            </a>
+
+            <a th:href="@{/medicos}">
+                ▣ &nbsp; Médicos
+            </a>
+
+            <div class="sidebar-bottom">
+                Sistema de gestión · Vital Salud
+            </div>
+
+        </aside>
+
+        <!-- CONTENIDO -->
+        <main class="main">
+
+            <!-- TÍTULO -->
+            <div class="page-heading">
+
+                <div>
+                    <div class="breadcrumb">
+                        Proceso 3 · Agenda y seguimiento
+                    </div>
+
+                    <h1>Agenda de citas</h1>
+                </div>
+
+                <a class="btn" th:href="@{/citas/nuevo}">
+                    + Programar cita
+                </a>
+
+            </div>
+
+            <!-- MENSAJES -->
+            <div class="note"
+                 th:if="${ok}"
+                 th:text="${ok}">
+            </div>
+
+            <div class="note warn"
+                 th:if="${error}"
+                 th:text="${error}">
+            </div>
+
+            <!-- FILTROS -->
+            <div class="panel toolbar">
+
+                <input
+                    class="search"
+                    id="q"
+                    type="text"
+                    placeholder="Buscar paciente o DNI"
+                    oninput="filtrar()">
+
+                <input
+                    id="fecha"
+                    type="date"
+                    th:value="${fechaFiltro}"
+                    onchange="cambiarFecha(this.value)"
+                    style="max-width:175px;
+                           padding:10px;
+                           border:1px solid #cddce7;
+                           border-radius:6px;">
+
+                <select id="estado" onchange="filtrar()">
+
+                    <option value="">
+                        Todos los estados
+                    </option>
+
+                    <option value="PENDIENTE_PAGO">
+                        Pendiente de pago
+                    </option>
+
+                    <option value="PROGRAMADA">
+                        Programada
+                    </option>
+
+                    <option value="ATENDIDA">
+                        Atendida
+                    </option>
+
+                    <option value="CANCELADA">
+                        Cancelada
+                    </option>
+
+                </select>
+
+            </div>
+
+            <!-- TABLA DE CITAS -->
+            <div class="panel">
+
+                <h2>
+                    Citas del día
+                    <span id="total" class="status-count"></span>
+                </h2>
+
+                <div class="table-wrap">
+
+                    <table>
+
+                        <thead>
+                            <tr>
+                                <th>HORA</th>
+                                <th>PACIENTE</th>
+                                <th>ESPECIALIDAD</th>
+                                <th>MÉDICO</th>
+                                <th>ESTADO</th>
+                                <th>PAGADO</th>
+                                <th>ACCIONES</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+
+                            <tr class="cita-row"
+                                th:each="r : ${registros}"
+                                th:attr="data-search=${r.paciente.dni + ' ' + r.paciente.nombres + ' ' + r.paciente.apellidos},
+                                         data-estado=${r.estado}">
+
+                                <!-- HORA -->
+                                <td th:text="${r.hora}">
+                                </td>
+
+                                <!-- PACIENTE -->
+                                <td th:text="${r.paciente.nombres + ' ' + r.paciente.apellidos}">
+                                </td>
+
+                                <!-- ESPECIALIDAD -->
+                                <td th:text="${r.especialidad}">
+                                </td>
+
+                                <!-- MÉDICO -->
+                                <td th:text="${r.medico != null ? r.medico.nombre : 'Sin asignar'}">
+                                </td>
+
+                                <!-- ESTADO -->
+                                <td>
+
+                                    <span class="tag"
+                                          th:classappend="${r.estado == 'PENDIENTE_PAGO'} ? 'yellow' : (${r.estado == 'CANCELADA'} ? 'gray' : 'blue')"
+                                          th:text="${r.estado == 'PENDIENTE_PAGO'} ? 'Pendiente de pago' : ${r.estado}">
+                                    </span>
+
+                                </td>
+
+                                <!-- PAGO -->
+                                <td th:text="${r.pagado == true ? 'S/ ' + r.montoConsulta : '—'}">
+                                </td>
+
+                                <!-- ACCIONES -->
+                                <td>
+
+                                    <div class="actions">
+
+                                        <!-- COBRAR -->
+                                        <a class="btn sm"
+                                           th:if="${r.estado == 'PENDIENTE_PAGO' and r.pagado != true}"
+                                           th:href="@{/pagos/cobrar/{id}(id=${r.id})}">
+
+                                            Cobrar
+
+                                        </a>
+
+                                        <!-- EDITAR / REPROGRAMAR -->
+                                        <a class="btn light sm"
+                                           th:if="${r.estado != 'CANCELADA'}"
+                                           th:href="@{/citas/editar/{id}(id=${r.id})}">
+
+                                            Editar / Reprogramar
+
+                                        </a>
+
+                                        <!-- CANCELAR -->
+                                        <form method="post"
+                                              th:if="${r.estado != 'CANCELADA' and r.pagado != true}"
+                                              th:action="@{/citas/cancelar/{id}(id=${r.id})}"
+                                              onsubmit="return confirm('¿Deseas cancelar esta cita?');">
+
+                                            <button class="btn danger sm"
+                                                    type="submit">
+
+                                                Cancelar
+
+                                            </button>
+
+                                        </form>
+
+                                        <!-- ELIMINAR DEFINITIVAMENTE -->
+                                        <form method="post"
+                                              th:action="@{/citas/eliminar/{id}(id=${r.id})}"
+                                              onsubmit="return confirm('¿Deseas eliminar definitivamente esta cita? Esta acción no se puede deshacer.');">
+
+                                            <button class="btn danger sm"
+                                                    type="submit">
+
+                                                Eliminar
+
+                                            </button>
+
+                                        </form>
+
+                                    </div>
+
+                                </td>
+
+                            </tr>
+
+                            <!-- SIN CITAS -->
+                            <tr th:if="${#lists.isEmpty(registros)}">
+
+                                <td colspan="7"
+                                    style="text-align:center; padding:25px;">
+
+                                    No hay citas registradas para esta fecha.
+
+                                </td>
+
+                            </tr>
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+            <!-- NOTA -->
+            <div class="note">
+
+                Al reprogramar se libera el horario anterior.
+                Los cobros se registran en MySQL;
+                no realizan cargos bancarios.
+
+            </div>
+
+        </main>
+
+    </div>
+
+    <!-- JAVASCRIPT -->
+    <script>
+
+        function cambiarFecha(fecha) {
+
+            window.location.href =
+                "/citas?fecha=" + encodeURIComponent(fecha);
+
+        }
+
+        function filtrar() {
+
+            const q = document.getElementById("q")
+                .value.toLowerCase().trim();
+
+            const estado = document.getElementById("estado").value;
+
+            let total = 0;
+
+            document.querySelectorAll(".cita-row").forEach(function (fila) {
+
+                const texto = (fila.dataset.search || "").toLowerCase();
+                const estadoFila = fila.dataset.estado || "";
+
+                const coincideTexto = texto.includes(q);
+                const coincideEstado = !estado || estadoFila === estado;
+
+                const mostrar = coincideTexto && coincideEstado;
+
+                fila.hidden = !mostrar;
+
+                if (mostrar) {
+                    total++;
+                }
+
+            });
+
+            document.getElementById("total").textContent =
+                total + (total === 1 ? " cita" : " citas");
+
+        }
+
+        filtrar();
+
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,163 @@
+
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Panel principal | DENTAL Vital Salud</title>
+
+    <!-- HOJA DE ESTILOS -->
+    <link rel="stylesheet" th:href="@{/css/estilos.css}">
+</head>
+
+<body>
+
+    <!-- ========================================= -->
+    <!-- ENCABEZADO PRINCIPAL -->
+    <!-- ========================================= -->
+    <header class="topbar">
+
+        <div class="brand">
+
+            <b class="brand-icon">✚</b>
+
+            <strong>
+                Sistema de Gestión Médica Integral
+            </strong>
+
+            <small>Vital Salud</small>
+
+        </div>
+
+        <div class="topbar-user">
+            Recepción <b>· DENTAL</b>
+        </div>
+
+    </header>
+
+    <!-- ========================================= -->
+    <!-- CONTENEDOR GENERAL -->
+    <!-- ========================================= -->
+    <div class="app">
+
+        <!-- ========================================= -->
+        <!-- MENÚ LATERAL -->
+        <!-- ========================================= -->
+        <aside class="sidebar">
+
+            <!-- PACIENTES -->
+            <a class="active" th:href="@{/pacientes}">
+                ▣ &nbsp; Pacientes
+            </a>
+
+            <!-- PROGRAMAR CITA -->
+            <a th:href="@{/citas/nuevo}">
+                ▣ &nbsp; Programar cita
+            </a>
+
+            <!-- AGENDA DE CITAS -->
+            <a th:href="@{/citas}">
+                ▣ &nbsp; Agenda de citas
+            </a>
+
+            <!-- PAGOS -->
+            <a th:href="@{/pagos}">
+                ▣ &nbsp; Pago de cita
+            </a>
+
+            <!-- MÉDICOS -->
+            <a th:href="@{/medicos}">
+                ▣ &nbsp; Médicos
+            </a>
+
+            <!-- PIE DEL MENÚ -->
+            <div class="sidebar-bottom">
+                Sistema de gestión · Vital Salud
+            </div>
+
+        </aside>
+
+        <!-- ========================================= -->
+        <!-- CONTENIDO PRINCIPAL -->
+        <!-- ========================================= -->
+        <main class="main">
+
+            <!-- ENCABEZADO DE PÁGINA -->
+            <div class="page-heading">
+
+                <div>
+
+                    <div class="breadcrumb">
+                        Sistema de Gestión Médica Integral
+                    </div>
+
+                    <h1>Panel principal</h1>
+
+                </div>
+
+            </div>
+
+            <!-- ========================================= -->
+            <!-- ACCESOS RÁPIDOS -->
+            <!-- ========================================= -->
+            <div class="grid two">
+
+                <!-- MÓDULO DE PACIENTES -->
+                <div class="panel">
+
+                    <h2>Pacientes</h2>
+
+                    <p class="subtle">
+                        Búsqueda, registro y ficha clínica.
+                    </p>
+
+                    <p>
+                        <a class="btn" th:href="@{/pacientes}">
+                            Ver pacientes
+                        </a>
+                    </p>
+
+                </div>
+
+                <!-- MÓDULO DE CITAS MÉDICAS -->
+                <div class="panel">
+
+                    <h2>Citas médicas</h2>
+
+                    <p class="subtle">
+                        Programación y agenda.
+                    </p>
+
+                    <p>
+                        <a class="btn" th:href="@{/citas}">
+                            Ver agenda
+                        </a>
+                    </p>
+
+                </div>
+
+            </div>
+
+            <!-- ========================================= -->
+            <!-- MÓDULO DE ATENCIONES -->
+            <!-- ========================================= -->
+            <div class="panel">
+
+                <h2>Atenciones</h2>
+
+                <p>
+                    <a class="btn" th:href="@{/historias}">
+                        Ver atenciones
+                    </a>
+                </p>
+
+            </div>
+
+        </main>
+
+    </div>
+
+</body>
+</html>

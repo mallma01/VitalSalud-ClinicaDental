@@ -1,0 +1,151 @@
+
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Ficha de médico | DENTAL Vital Salud</title>
+
+    <link rel="stylesheet" th:href="@{/css/estilos.css}">
+</head>
+
+<body>
+
+    <!-- ENCABEZADO PRINCIPAL -->
+    <header class="topbar">
+
+        <div class="brand">
+            <b class="brand-icon">✚</b>
+
+            <strong>
+                Sistema de Gestión Médica Integral
+            </strong>
+
+            <small>Vital Salud</small>
+        </div>
+
+        <div class="topbar-user">
+            Recepción <b>· DENTAL</b>
+        </div>
+
+    </header>
+
+    <div class="app">
+
+        <!-- MENÚ LATERAL -->
+        <aside class="sidebar">
+
+            <a th:href="@{/pacientes}">
+                ▣ &nbsp; Pacientes
+            </a>
+
+            <a th:href="@{/citas/nuevo}">
+                ▣ &nbsp; Programar cita
+            </a>
+
+            <a th:href="@{/citas}">
+                ▣ &nbsp; Agenda de citas
+            </a>
+
+            <a th:href="@{/pagos}">
+                ▣ &nbsp; Pago de cita
+            </a>
+
+            <a class="active" th:href="@{/medicos}">
+                ▣ &nbsp; Médicos
+            </a>
+
+            <div class="sidebar-bottom">
+                Sistema de gestión · Vital Salud
+            </div>
+
+        </aside>
+
+        <!-- CONTENIDO PRINCIPAL -->
+        <main class="main">
+
+            <!-- TÍTULO -->
+            <div class="page-heading">
+
+                <div>
+                    <div class="breadcrumb">
+                        Registrar y editar médicos
+                    </div>
+
+                    <h1>Ficha de médico</h1>
+                </div>
+
+            </div>
+
+            <!-- FORMULARIO -->
+            <form
+                method="post"
+                th:action="@{/medicos/guardar}"
+                th:object="${registro}">
+
+                <!-- ID OCULTO PARA EDICIÓN -->
+                <input
+                    type="hidden"
+                    th:field="*{id}">
+
+                <!-- DATOS DEL MÉDICO -->
+                <div class="panel">
+
+                    <div class="grid two">
+
+                        <!-- NOMBRE COMPLETO -->
+                        <label class="field">
+
+                            Nombre completo
+
+                            <input
+                                type="text"
+                                th:field="*{nombre}"
+                                placeholder="Dr. Denis Ulloa"
+                                required>
+
+                        </label>
+
+                        <!-- CORREO ELECTRÓNICO -->
+                        <label class="field">
+
+                            Correo electrónico
+
+                            <input
+                                type="email"
+                                th:field="*{correo}"
+                                placeholder="medico@example.com">
+
+                        </label>
+
+                    </div>
+
+                </div>
+
+                <!-- BOTONES -->
+                <button
+                    class="btn"
+                    type="submit">
+
+                    Guardar médico
+
+                </button>
+
+                <a
+                    class="btn light"
+                    th:href="@{/medicos}">
+
+                    Cancelar
+
+                </a>
+
+            </form>
+
+        </main>
+
+    </div>
+
+</body>
+</html>
